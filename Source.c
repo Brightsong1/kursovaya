@@ -685,7 +685,7 @@ void main(int argc, char** argv) {
 
 	FILE* fileinput;
 	FILE* fileout;
-	char name_file_input[15] = "9.bmp", name_file_out[15] = "our.bmp";
+	char name_file_input[15] = "5.bmp", name_file_out[15] = "our.bmp";
 
 	//read input file name
 	/*

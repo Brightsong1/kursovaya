@@ -6,6 +6,7 @@
 #include <malloc.h>
 #include <string.h>
 #include<math.h>
+#include <time.h>
 
 struct pixel {
 	uint8_t r;
@@ -249,8 +250,8 @@ void find_neighboring_areas(int** integer_pixelmap_image, uint8_t** matrix_of_sm
 	}
 }
 //norm
-/*
-void find_groups_of_areas(int** integer_pixelmap_image, int** matrix_of_smej, int** groups_of_areas, int sizeof_matrix_of_smej, int length_image, int height_image) {
+
+void find_groups_of_areas(int** integer_pixelmap_image, uint8_t** matrix_of_smej, int** groups_of_areas, int sizeof_matrix_of_smej, int length_image, int height_image) {
 	int ik1 = 0, jk1 = 0, flagcol = 0, max1 = 0, sch1, ik1pr = -1, jk2;
 	while (1) {
 		ik1 = -1;
@@ -357,7 +358,7 @@ void find_groups_of_areas(int** integer_pixelmap_image, int** matrix_of_smej, in
 		}
 	}
 }
-*/
+
 //opt 1
 /*
 void find_groups_of_areas(int** integer_pixelmap_image, int** matrix_of_smej, int sizeof_matrix_of_smej, int length_image, int height_image) {
@@ -502,6 +503,7 @@ void find_groups_of_areas(int** integer_pixelmap_image, int** matrix_of_smej, in
 }
 */
 //opt 2
+/*
 void find_groups_of_areas(int** integer_pixelmap_image, uint8_t** matrix_of_smej, int sizeof_matrix_of_smej, int length_image, int height_image) {
 	int ik1 = 0, jk1 = 0, flagcol = 0, max1 = 0, ik1pr = -1, jk2;
 	int** new_groups_of_areas;
@@ -637,8 +639,9 @@ void find_groups_of_areas(int** integer_pixelmap_image, uint8_t** matrix_of_smej
 					}
 					memcpy(buffer_temp1, matrix_of_smej[ik1], sizeof_matrix_of_smej);
 					memcpy(buffer_temp2, matrix_of_smej[jk2], sizeof_matrix_of_smej);
-					for (int il = 0; il < ilisch; il++) {
+					for (int il = 0; il <= ilisch; il++) {
 						buffer_temp3[il] = buffer_temp1[il] | buffer_temp2[il];
+						// 3 = 1 or 2 , 3 = 1 ^ 3, uint8_t 3 = count1
 					}
 					memcpy(matrix_of_smej[ik1], buffer_temp3, sizeof_matrix_of_smej);
 					memcpy(buffer_temp1, buffer_full_0, sizeof_matrix_of_smej);
@@ -680,12 +683,16 @@ void find_groups_of_areas(int** integer_pixelmap_image, uint8_t** matrix_of_smej
 	}
 	free(new_groups_of_areas);
 }
+*/
 
 void main(int argc, char** argv) {
 
+	clock_t t;
+	t = clock();
+
 	FILE* fileinput;
 	FILE* fileout;
-	char name_file_input[15] = "5.bmp", name_file_out[15] = "our.bmp";
+	char name_file_input[15] = "12.bmp", name_file_out[15] = "our.bmp";
 
 	//read input file name
 	/*
@@ -807,7 +814,7 @@ void main(int argc, char** argv) {
 			exit(-1);
 		}
 	}
-	
+
 	// identify slots for areas in matrix of smej
 	find_neighboring_areas(integer_pixelmap_image, matrix_of_smej, length_input_image, height_input_image, sizeof_matrix_of_smej);
 
@@ -833,9 +840,27 @@ void main(int argc, char** argv) {
 	}
 
 
+	int** groupcol;
+	groupcol = (int**)malloc(sizeof_matrix_of_smej * sizeof(int*));
+	if (groupcol == NULL) {
+		printf("malloc error");
+		exit(-1);
+	}
+	for (int i = 0; i < sizeof_matrix_of_smej; i++) {
+		groupcol[i] = (int*)malloc(sizeof_matrix_of_smej * sizeof(int));
+		if (groupcol[i] == NULL) {
+			printf("malloc error");
+			exit(-1);
+		}
+	}
+	for (int i = 0; i < sizeof_matrix_of_smej; i++) {
+		for (int j = 0; j < sizeof_matrix_of_smej; j++) {
+			groupcol[i][j] = 0;
+		}
+	}
 
 	// try to combinate areas in groups
-	find_groups_of_areas(integer_pixelmap_image, matrix_of_smej, sizeof_matrix_of_smej, length_input_image, height_input_image);
+	find_groups_of_areas(integer_pixelmap_image, matrix_of_smej, groupcol, sizeof_matrix_of_smej, length_input_image, height_input_image);
 
 
 
@@ -892,4 +917,9 @@ void main(int argc, char** argv) {
 	free(pixelmap_image);
 	fclose(fileinput);
 	fclose(fileout);
+
+	t = clock() - t;
+	double time_taken = ((double)t) / CLOCKS_PER_SEC; 
+
+	printf(" %f seconds to execute \n", time_taken);
 }

@@ -249,261 +249,11 @@ void find_neighboring_areas(int** integer_pixelmap_image, uint8_t** matrix_of_sm
 		}
 	}
 }
-//norm
-
-void find_groups_of_areas(int** integer_pixelmap_image, uint8_t** matrix_of_smej, int** groups_of_areas, int sizeof_matrix_of_smej, int length_image, int height_image) {
-	int ik1 = 0, jk1 = 0, flagcol = 0, max1 = 0, sch1, ik1pr = -1, jk2;
-	while (1) {
-		ik1 = -1;
-		max1 = 0;
-		for (int i = 0; i < sizeof_matrix_of_smej; i++) {
-			sch1 = 0;
-			for (int j = 0; j < sizeof_matrix_of_smej; j++) {
-				if (matrix_of_smej[i][j] == 1) {
-					sch1++;
-				}
-			}
-			if (sch1 > max1 && sch1 != sizeof_matrix_of_smej) {
-				ik1 = i;
-				max1 = sch1;
-			}
-		}
-		if (ik1 == -1) {
-			break;
-		}
-		if (ik1 == ik1pr) {
-			for (int j = 0; j < sizeof_matrix_of_smej; j++) {
-				matrix_of_smej[ik1][j] = 1;
-			}
-			continue;
-		}
-		ik1pr = ik1;
-		jk1 = 0;
-		flagcol = 0;
-		for (int i = 0; i < sizeof_matrix_of_smej; i++) {
-			for (int j = 0; j < sizeof_matrix_of_smej; j++) {
-				if (groups_of_areas[i][j] == ik1 + 2) {
-					flagcol = 1;
-					break;
-				}
-			}
-		}
-		if (flagcol == 0) {
-			groups_of_areas[ik1][jk1] = ik1 + 2;
-			jk1++;
-			while (1) {
-				jk2 = -1;
-				max1 = 0;
-				for (int i = 0; i < sizeof_matrix_of_smej; i++) {
-					sch1 = 0;
-					if (matrix_of_smej[ik1][i] == 0) {
-						for (int j = 0; j < sizeof_matrix_of_smej; j++) {
-							if (matrix_of_smej[i][j] == 1) {
-								sch1++;
-							}
-						}
-						if (sch1 > max1 && sch1 != sizeof_matrix_of_smej) {
-							jk2 = i;
-							max1 = sch1;
-						}
-					}
-				}
-				if (jk2 == -1) {
-					break;
-				}
-				flagcol = 1;
-				for (int i = 0; i < sizeof_matrix_of_smej; i++) {
-					for (int j = 0; j < sizeof_matrix_of_smej; j++) {
-						if (groups_of_areas[i][j] == jk2 + 2) {
-							flagcol = 0;
-							break;
-						}
-					}
-				}
-				if (flagcol) {
-					for (int jk3 = 0; jk3 < sizeof_matrix_of_smej; jk3++) {
-						if (matrix_of_smej[ik1][jk3] == 1 || matrix_of_smej[jk2][jk3] == 1) {
-							matrix_of_smej[ik1][jk3] = 1;
-							matrix_of_smej[jk2][jk3] = 1;
-						}
-						if (matrix_of_smej[ik1][jk3] == 0 && matrix_of_smej[jk2][jk3] == 0) {
-							matrix_of_smej[ik1][jk3] = 0;
-							matrix_of_smej[jk2][jk3] = 1;
-						}
-					}
-					groups_of_areas[ik1][jk1] = jk2 + 2;
-					jk1++;
-				}
-			}
-		}
-	}
-	int number_of_group = sizeof_matrix_of_smej+3;
-	for (int i = 0; i < sizeof_matrix_of_smej; i++) {
-		for (int j = 0; j < sizeof_matrix_of_smej; j++) {
-			if (groups_of_areas[i][j] == 0) {
-				break;
-			}
-			else {
-				if (j == 0) {
-					number_of_group +=1;
-				}
-				for (int ii = 0; ii < height_image; ii++) {
-					for (int jj = 0; jj < length_image; jj++) {
-						if (integer_pixelmap_image[ii][jj] == groups_of_areas[i][j]) {
-							integer_pixelmap_image[ii][jj] = number_of_group;
-						}
-					}
-				}
-			}
-		}
-	}
-}
-
-//opt 1
-/*
-void find_groups_of_areas(int** integer_pixelmap_image, int** matrix_of_smej, int sizeof_matrix_of_smej, int length_image, int height_image) {
-	int ik1 = 0, jk1 = 0, flagcol = 0, max1 = 0, ik1pr = -1, jk2;
-	int **new_groups_of_areas;
-	new_groups_of_areas = (int**)calloc(5, sizeof(int*));
-	if (new_groups_of_areas == NULL) {
-		printf("malloc error");
-		exit(-1);
-	}
-	for (int i = 0; i < 5; i++) {
-		new_groups_of_areas[i] = (int*)calloc(sizeof_matrix_of_smej, sizeof(int));
-		if (new_groups_of_areas[i] == NULL) {
-			printf("malloc error");
-			exit(-1);
-		}
-	}
-	int* buffer;
-	buffer = (int*)calloc(sizeof_matrix_of_smej, sizeof(int));
-	if (buffer == NULL) {
-		printf("malloc error");
-		exit(-1);
-	}
-	for (int i = 0; i < sizeof_matrix_of_smej; i++) {
-		buffer[i] = 1;
-	}
-	int* count_one_in_str_of_matrix;
-	int temp_count=0;
-	count_one_in_str_of_matrix = (int*)calloc(sizeof_matrix_of_smej, sizeof(int));
-	for (int i = 0; i < sizeof_matrix_of_smej; i++) {
-		for (int j = 0; j < sizeof_matrix_of_smej; j++) {
-			if (matrix_of_smej[i][j] == 1) {
-				count_one_in_str_of_matrix[i]++;
-			}
-		}
-	}
 
 
-	while (1) {
-		ik1 = -1;
-		max1 = 0;
-		for (int i = 0; i < sizeof_matrix_of_smej; i++) {
-			if (count_one_in_str_of_matrix[i] > max1 && count_one_in_str_of_matrix[i] != sizeof_matrix_of_smej) {
-				ik1 = i;
-				max1 = count_one_in_str_of_matrix[i];
-			}
-		}
-		if (ik1 == -1) {
-			break;
-		}
-		if (ik1 == ik1pr) {
-			memcpy(matrix_of_smej[ik1], buffer, sizeof_matrix_of_smej*sizeof(int));
-			count_one_in_str_of_matrix[ik1] = sizeof_matrix_of_smej;
-			continue;
-		}
-		ik1pr = ik1;
-		jk1 = 0;
-		flagcol = 0;
-		for (int i = 0; i < 5; i++) {
-			if (new_groups_of_areas[i][0] == 0) {
-				break;
-			}
-			for (int j = 0; j < sizeof_matrix_of_smej; j++) {
-				if (new_groups_of_areas[i][j] == ik1 + 2) {
-					flagcol = 1;
-					break;
-				}
-			}
-		}
-		if (flagcol == 0) {
-			new_groups_of_areas[temp_count][0] = ik1 + 2;
-			jk1++;
-			while (1) {
-				jk2 = -1;
-				max1 = 0;
-				for (int i = 0; i < sizeof_matrix_of_smej; i++) {
-					if (matrix_of_smej[ik1][i] == 0 && count_one_in_str_of_matrix[i] > max1 && count_one_in_str_of_matrix[i] != sizeof_matrix_of_smej) {
-						jk2 = i;
-						max1 = count_one_in_str_of_matrix[i];
-					}
-				}
-				if (jk2 == -1) {
-					break;
-				}
-				flagcol = 1;
-				for (int i = 0; i < 5; i++) {
-					if(new_groups_of_areas[i][0] == 0){
-						break;
-					}
-					for (int j = 0; j < sizeof_matrix_of_smej; j++) {
-						if (new_groups_of_areas[i][j] == jk2 + 2) {
-							flagcol = 0;
-							break;
-						}
-					}
-				}
-				if (flagcol) {
-					for (int jk3 = 0; jk3 < sizeof_matrix_of_smej; jk3++) {
-						if (matrix_of_smej[ik1][jk3] == 1 || matrix_of_smej[jk2][jk3] == 1) {
-							if (matrix_of_smej[ik1][jk3] == 0) {
-								count_one_in_str_of_matrix[ik1]++;
-							}
-							matrix_of_smej[ik1][jk3] = 1;
-						}
-						if (matrix_of_smej[ik1][jk3] == 0 && matrix_of_smej[jk2][jk3] == 0) {
-							matrix_of_smej[ik1][jk3] = 0;
-						}
-					}
-					memcpy(matrix_of_smej[jk2], buffer, sizeof_matrix_of_smej * sizeof(int));
-					count_one_in_str_of_matrix[jk2] = sizeof_matrix_of_smej;
-					new_groups_of_areas[temp_count][jk1] = jk2 + 2;
-					jk1++;
-				}
-			}
-			temp_count++;
-		}
-	}
-	int number_of_group = sizeof_matrix_of_smej + 3;
-	for (int i = 0; i < 5; i++) {
-		for (int j = 0; j < sizeof_matrix_of_smej; j++) {
-			if (new_groups_of_areas[i][j] == 0) {
-				break;
-			}
-			else {
-				if (j == 0) {
-					number_of_group += 1;
-				}
-				for (int ii = 0; ii < height_image; ii++) {
-					for (int jj = 0; jj < length_image; jj++) {
-						if (integer_pixelmap_image[ii][jj] == new_groups_of_areas[i][j]) {
-							integer_pixelmap_image[ii][jj] = number_of_group;
-						}
-					}
-				}
-			}
-		}
-	}
-	for (int i = 0; i < 5; i++) {
-		free(new_groups_of_areas[i]);
-	}
-	free(new_groups_of_areas);
-}
-*/
+
 //opt 2
-/*
+
 void find_groups_of_areas(int** integer_pixelmap_image, uint8_t** matrix_of_smej, int sizeof_matrix_of_smej, int length_image, int height_image) {
 	int ik1 = 0, jk1 = 0, flagcol = 0, max1 = 0, ik1pr = -1, jk2;
 	int** new_groups_of_areas;
@@ -629,7 +379,7 @@ void find_groups_of_areas(int** integer_pixelmap_image, uint8_t** matrix_of_smej
 						}
 					}
 				}
-				if (flagcol) {
+				if (flagcol == 1) {
 					for (int jk3 = 0; jk3 < sizeof_matrix_of_smej; jk3++) {
 						if (matrix_of_smej[ik1][jk3] == 1 || matrix_of_smej[jk2][jk3] == 1) {
 							if (matrix_of_smej[ik1][jk3] == 0) {
@@ -683,7 +433,7 @@ void find_groups_of_areas(int** integer_pixelmap_image, uint8_t** matrix_of_smej
 	}
 	free(new_groups_of_areas);
 }
-*/
+
 
 void main(int argc, char** argv) {
 
@@ -692,7 +442,7 @@ void main(int argc, char** argv) {
 
 	FILE* fileinput;
 	FILE* fileout;
-	char name_file_input[15] = "12.bmp", name_file_out[15] = "our.bmp";
+	char name_file_input[15] = "9.bmp", name_file_out[15] = "our.bmp";
 
 	//read input file name
 	/*
@@ -840,27 +590,9 @@ void main(int argc, char** argv) {
 	}
 
 
-	int** groupcol;
-	groupcol = (int**)malloc(sizeof_matrix_of_smej * sizeof(int*));
-	if (groupcol == NULL) {
-		printf("malloc error");
-		exit(-1);
-	}
-	for (int i = 0; i < sizeof_matrix_of_smej; i++) {
-		groupcol[i] = (int*)malloc(sizeof_matrix_of_smej * sizeof(int));
-		if (groupcol[i] == NULL) {
-			printf("malloc error");
-			exit(-1);
-		}
-	}
-	for (int i = 0; i < sizeof_matrix_of_smej; i++) {
-		for (int j = 0; j < sizeof_matrix_of_smej; j++) {
-			groupcol[i][j] = 0;
-		}
-	}
 
 	// try to combinate areas in groups
-	find_groups_of_areas(integer_pixelmap_image, matrix_of_smej, groupcol, sizeof_matrix_of_smej, length_input_image, height_input_image);
+	find_groups_of_areas(integer_pixelmap_image, matrix_of_smej, sizeof_matrix_of_smej, length_input_image, height_input_image);
 
 
 

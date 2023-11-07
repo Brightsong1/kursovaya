@@ -38,51 +38,38 @@ void push(stack** head, int x_new, int y_new) {
 	(*head) = new;
 }
 
-void identify_every_area(int** integer_pixelmap_image,int lenght_image,int height_image,int* count_of_colors) {
-	stack* stack = NULL;
-	int k1, k2, i2, j2;
-	while (1) {
-		for (int i = 0; i < height_image; i++) {
-			for (int j = 0; j < lenght_image; j++) {
-				k1 = i;
-				k2 = j;
-				if (integer_pixelmap_image[i][j] == 0) {
-					push(&stack, i, j);
-					break;
-				}
 
+
+void identify_every_area(int** integer_pixelmap_image, int lenght_image, int height_image, int* count_of_colors) {
+	stack* stack = NULL;
+	int k1 = 0, k2 = 0, i2, j2;
+	for (int i = 0; i < height_image; i++) {
+		for (int j = 0; j < lenght_image; j++) {
+			if (integer_pixelmap_image[i][j] == 0) {
+				push(&stack, i, j);
+				while (1) {
+					i2 = stack->x;
+					j2 = stack->y;
+					integer_pixelmap_image[i2][j2] = (*count_of_colors);
+					pop(&stack);
+					if ((i2 < height_image - 1) && (integer_pixelmap_image[i2 + 1][j2] == 0)) {
+						push(&stack, i2 + 1, j2);
+					}
+					if ((i2 > 0) && (integer_pixelmap_image[i2 - 1][j2] == 0)) {
+						push(&stack, i2 - 1, j2);
+					}
+					if ((j2 < lenght_image - 1) && (integer_pixelmap_image[i2][j2 + 1] == 0)) {
+						push(&stack, i2, j2 + 1);
+					}
+					if ((j2 > 0) && (integer_pixelmap_image[i2][j2 - 1] == 0)) {
+						push(&stack, i2, j2 - 1);
+					}
+					if (stack == NULL) {
+						break;
+					}
+				}
+				(*count_of_colors)++;
 			}
-			if (stack != NULL) {
-				break;
-			}
-		}
-		if (stack == NULL) {
-			break;
-		}
-		while (1) {
-			i2 = stack->x;
-			j2 = stack->y;
-			integer_pixelmap_image[i2][j2] =  (*count_of_colors);
-			pop(&stack);
-			if ((i2 < height_image - 1) && (integer_pixelmap_image[i2 + 1][j2] == 0)) {
-				push(&stack, i2 + 1, j2);
-			}
-			if ((i2 > 0) && (integer_pixelmap_image[i2 - 1][j2] == 0)) {
-				push(&stack, i2 - 1, j2);
-			}
-			if ((j2 < lenght_image - 1) && (integer_pixelmap_image[i2][j2 + 1] == 0)) {
-				push(&stack, i2, j2 + 1);
-			}
-			if ((j2 > 0) && (integer_pixelmap_image[i2][j2 - 1] == 0)) {
-				push(&stack, i2, j2 - 1);
-			}
-			if (stack == NULL) {
-				break;
-			}
-		}
-		(*count_of_colors)++;
-		if ((k1 == height_image - 1) && (k2 == lenght_image - 1)) {
-			break;
 		}
 	}
 }
@@ -108,7 +95,7 @@ void find_neighboring_areas(int** integer_pixelmap_image, uint8_t** matrix_of_sm
 						break;
 					}
 				}
-				if (j2 - dl1 >= 0) {
+				if (dl1 <= j2) {
 					if (integer_pixelmap_image[i][j2 - dl1] != integer_pixelmap_image[i2][j2] && integer_pixelmap_image[i][j2 - dl1] != 1) {
 						for (int temp = i; temp < height_image; temp++) {
 							if ((integer_pixelmap_image[temp][j2] != integer_pixelmap_image[i2][j2] && integer_pixelmap_image[temp][j2] != 1)) {
@@ -145,7 +132,7 @@ void find_neighboring_areas(int** integer_pixelmap_image, uint8_t** matrix_of_sm
 						break;
 					}
 				}
-				if (j2 - dl1 >= 0) {
+				if (dl1 <= j2) {
 					if (integer_pixelmap_image[i][j2 - dl1] != integer_pixelmap_image[i2][j2] && integer_pixelmap_image[i][j2 - dl1] != 1) {
 						for (int temp = i; temp >= 0; temp--) {
 							if ((integer_pixelmap_image[temp][j2] != integer_pixelmap_image[i2][j2] && integer_pixelmap_image[temp][j2] != 1)) {
@@ -182,7 +169,7 @@ void find_neighboring_areas(int** integer_pixelmap_image, uint8_t** matrix_of_sm
 						break;
 					}
 				}
-				if (i2 - dl1 >= 0) {
+				if (i2 >= dl1) {
 					if (integer_pixelmap_image[i2 - dl1][j] != integer_pixelmap_image[i2][j2] && integer_pixelmap_image[i2 - dl1][j] != 1) {
 						for (int temp = j; temp < length_image; temp++) {
 							if ((integer_pixelmap_image[i2][temp] != integer_pixelmap_image[i2][j2] && integer_pixelmap_image[i2][temp] != 1)) {
@@ -219,7 +206,7 @@ void find_neighboring_areas(int** integer_pixelmap_image, uint8_t** matrix_of_sm
 						break;
 					}
 				}
-				if (i2 - dl1 >= 0) {
+				if (i2 >= dl1) {
 					if (integer_pixelmap_image[i2 - dl1][j] != integer_pixelmap_image[i2][j2] && integer_pixelmap_image[i2 - dl1][j] != 1) {
 						for (int temp = j; temp >= 0; temp--) {
 							if ((integer_pixelmap_image[i2][temp] != integer_pixelmap_image[i2][j2] && integer_pixelmap_image[i2][temp] != 1)) {
@@ -252,7 +239,7 @@ void find_neighboring_areas(int** integer_pixelmap_image, uint8_t** matrix_of_sm
 
 
 
-//opt 2
+
 
 void find_groups_of_areas(int** integer_pixelmap_image, uint8_t** matrix_of_smej, int sizeof_matrix_of_smej, int length_image, int height_image) {
 	int ik1 = 0, jk1 = 0, flagcol = 0, max1 = 0, ik1pr = -1, jk2;
@@ -278,7 +265,7 @@ void find_groups_of_areas(int** integer_pixelmap_image, uint8_t** matrix_of_smej
 	for (int i = 0; i < sizeof_matrix_of_smej; i++) {
 		buffer_full_1[i] = 1;
 	}
-	
+
 	uint8_t* buffer_full_0;
 	buffer_full_0 = (uint8_t*)calloc(sizeof_matrix_of_smej, sizeof(uint8_t));
 	if (buffer_full_0 == NULL) {
@@ -286,7 +273,7 @@ void find_groups_of_areas(int** integer_pixelmap_image, uint8_t** matrix_of_smej
 		exit(-1);
 	}
 	uint64_t* buffer_temp1;
-	buffer_temp1 = (uint64_t*)calloc(sizeof_matrix_of_smej+ (sizeof_matrix_of_smej%8), sizeof(uint8_t));
+	buffer_temp1 = (uint64_t*)calloc(sizeof_matrix_of_smej + (sizeof_matrix_of_smej % 8), sizeof(uint8_t));
 	if (buffer_temp1 == NULL) {
 		printf("malloc error");
 		exit(-1);
@@ -304,9 +291,9 @@ void find_groups_of_areas(int** integer_pixelmap_image, uint8_t** matrix_of_smej
 		exit(-1);
 	}
 
-	int ilisch = sizeof_matrix_of_smej/8;
+	int ilisch = sizeof_matrix_of_smej / 8;
 
-	
+
 
 	int* count_one_in_str_of_matrix;
 	int temp_count = 0;
@@ -318,14 +305,14 @@ void find_groups_of_areas(int** integer_pixelmap_image, uint8_t** matrix_of_smej
 			}
 		}
 	}
-	
+
 
 
 	while (1) {
 		ik1 = -1;
 		max1 = 0;
 		for (int i = 0; i < sizeof_matrix_of_smej; i++) {
-			if (count_one_in_str_of_matrix[i] > max1 && count_one_in_str_of_matrix[i] != sizeof_matrix_of_smej) {
+			if (count_one_in_str_of_matrix[i] != sizeof_matrix_of_smej && count_one_in_str_of_matrix[i] > max1) {
 				ik1 = i;
 				max1 = count_one_in_str_of_matrix[i];
 			}
@@ -334,7 +321,7 @@ void find_groups_of_areas(int** integer_pixelmap_image, uint8_t** matrix_of_smej
 			break;
 		}
 		if (ik1 == ik1pr) {
-			memcpy(matrix_of_smej[ik1], buffer_full_1, sizeof_matrix_of_smej );
+			memcpy(matrix_of_smej[ik1], buffer_full_1, sizeof_matrix_of_smej);
 			count_one_in_str_of_matrix[ik1] = sizeof_matrix_of_smej;
 			continue;
 		}
@@ -359,7 +346,7 @@ void find_groups_of_areas(int** integer_pixelmap_image, uint8_t** matrix_of_smej
 				jk2 = -1;
 				max1 = 0;
 				for (int i = 0; i < sizeof_matrix_of_smej; i++) {
-					if (matrix_of_smej[ik1][i] == 0 && count_one_in_str_of_matrix[i] > max1 && count_one_in_str_of_matrix[i] != sizeof_matrix_of_smej) {
+					if (matrix_of_smej[ik1][i] == 0 && count_one_in_str_of_matrix[i] != sizeof_matrix_of_smej && count_one_in_str_of_matrix[i] > max1) {
 						jk2 = i;
 						max1 = count_one_in_str_of_matrix[i];
 					}
@@ -381,25 +368,22 @@ void find_groups_of_areas(int** integer_pixelmap_image, uint8_t** matrix_of_smej
 				}
 				if (flagcol == 1) {
 					for (int jk3 = 0; jk3 < sizeof_matrix_of_smej; jk3++) {
-						if (matrix_of_smej[ik1][jk3] == 1 || matrix_of_smej[jk2][jk3] == 1) {
-							if (matrix_of_smej[ik1][jk3] == 0) {
-								count_one_in_str_of_matrix[ik1]++;
-							}
+						if (matrix_of_smej[ik1][jk3] == 0 && matrix_of_smej[jk2][jk3] == 1) {
+							count_one_in_str_of_matrix[ik1]++;
 						}
 					}
 					memcpy(buffer_temp1, matrix_of_smej[ik1], sizeof_matrix_of_smej);
 					memcpy(buffer_temp2, matrix_of_smej[jk2], sizeof_matrix_of_smej);
 					for (int il = 0; il <= ilisch; il++) {
 						buffer_temp3[il] = buffer_temp1[il] | buffer_temp2[il];
-						// 3 = 1 or 2 , 3 = 1 ^ 3, uint8_t 3 = count1
 					}
 					memcpy(matrix_of_smej[ik1], buffer_temp3, sizeof_matrix_of_smej);
 					memcpy(buffer_temp1, buffer_full_0, sizeof_matrix_of_smej);
 					memcpy(buffer_temp2, buffer_full_0, sizeof_matrix_of_smej);
 					memcpy(buffer_temp3, buffer_full_0, sizeof_matrix_of_smej);
 
-					
-					memcpy(matrix_of_smej[jk2], buffer_full_1, sizeof_matrix_of_smej );
+
+					memcpy(matrix_of_smej[jk2], buffer_full_1, sizeof_matrix_of_smej);
 					count_one_in_str_of_matrix[jk2] = sizeof_matrix_of_smej;
 					new_groups_of_areas[temp_count][jk1] = jk2 + 2;
 					jk1++;
@@ -432,20 +416,25 @@ void find_groups_of_areas(int** integer_pixelmap_image, uint8_t** matrix_of_smej
 		free(new_groups_of_areas[i]);
 	}
 	free(new_groups_of_areas);
+	free(buffer_full_0);
+	free(buffer_full_1);
+	free(buffer_temp1);
+	free(buffer_temp2);
+	free(buffer_temp3);
+
 }
 
 
 void main(int argc, char** argv) {
 
-	clock_t t;
-	t = clock();
+
 
 	FILE* fileinput;
 	FILE* fileout;
-	char name_file_input[15] = "9.bmp", name_file_out[15] = "our.bmp";
+	char name_file_input[15], name_file_out[15];
 
 	//read input file name
-	/*
+
 	printf("Enter the name of the file containing the image.\n");
 	gets(name_file_input);
 	int bmp = strlen(name_file_input);
@@ -464,32 +453,30 @@ void main(int argc, char** argv) {
 	name_file_out[++bmp] = 'm';
 	name_file_out[++bmp] = 'p';
 	name_file_out[++bmp] = '\0';
-	*/
+
 
 	// check file
 	if ((fileinput = fopen(name_file_input, "rb")) == NULL)
 	{
 		printf("Incorect name of file input");
-		_getch();
 		exit(-1);
 	}
 	if ((fileout = fopen(name_file_out, "wb+")) == NULL)
 	{
 		printf("Incorect name of file out");
-		_getch();
 		exit(-1);
 	}
 
 	//copy metadata
 	fseek(fileinput, 0, SEEK_SET);
-	uint8_t* temp;
-	for (int i = 0; i < 54; i++) {
-		fread(&temp, sizeof(uint8_t), 1, fileinput);
-		fwrite(&temp, sizeof(uint8_t), 1, fileout);
+	uint64_t* temp;
+	for (int i = 0; i < 9; i++) {
+		fread(&temp, sizeof(uint8_t), 6, fileinput);
+		fwrite(&temp, sizeof(uint8_t), 6, fileout);
 	}
 
 	// read legth, height from input image
-	int length_input_image,  height_input_image;
+	int length_input_image, height_input_image;
 	fseek(fileinput, 18, SEEK_SET);
 	fread(&length_input_image, sizeof(int), 1, fileinput);
 	fread(&height_input_image, sizeof(int), 1, fileinput);
@@ -558,7 +545,7 @@ void main(int argc, char** argv) {
 		exit(-1);
 	}
 	for (int i = 0; i < sizeof_matrix_of_smej; i++) {
-		matrix_of_smej[i] = (uint8_t*)calloc(sizeof_matrix_of_smej , sizeof(uint8_t));
+		matrix_of_smej[i] = (uint8_t*)calloc(sizeof_matrix_of_smej, sizeof(uint8_t));
 		if (matrix_of_smej[i] == NULL) {
 			printf("malloc error");
 			exit(-1);
@@ -570,11 +557,7 @@ void main(int argc, char** argv) {
 
 	// correct matrix of smej
 	for (int i = 0; i < sizeof_matrix_of_smej; i++) {
-		for (int j = 0; j < sizeof_matrix_of_smej; j++) {
-			if (i == j) {
-				matrix_of_smej[i][j] = 1;
-			}
-		}
+		matrix_of_smej[i][i] = 1;
 	}
 	for (int i = 0; i < sizeof_matrix_of_smej; i++) {
 		for (int j = 0; j < sizeof_matrix_of_smej; j++) {
@@ -649,9 +632,4 @@ void main(int argc, char** argv) {
 	free(pixelmap_image);
 	fclose(fileinput);
 	fclose(fileout);
-
-	t = clock() - t;
-	double time_taken = ((double)t) / CLOCKS_PER_SEC; 
-
-	printf(" %f seconds to execute \n", time_taken);
 }
